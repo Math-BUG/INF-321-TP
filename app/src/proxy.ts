@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+import prisma from "./lib/prisma";
 
 export async function proxy(request: NextRequest) {
     const notAuthenticatedPages = ['/login', '/register'];
 
-    const authenticated = false;
-    const typeUser = "admin";
+    const users = await prisma.user.findMany();
 
+    const authenticated = false;
+    const typeUser: string = "admin";
+
+    if (request.nextUrl.pathname.startsWith('/api')) {
+        return NextResponse.next();
+    }
     if (
         !authenticated
     ) {

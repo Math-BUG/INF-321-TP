@@ -44,3 +44,6 @@ next-env.d.ts
 /generated/prisma
 # Banco de dados SQLite
 dev.db
+/src/generated/prisma
+
+/generated/prisma
