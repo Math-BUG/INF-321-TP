@@ -16,40 +16,44 @@ async function seedChallenges() {
     await seedIntervalRecognitionChallenge();
 }
 async function seedNotesDifferentiationChallenge() {
-    const challenge = await prisma.challenge.create({
-        data: {
-            name: "Diferenciação de Notas Musicais",
+    const challenge = await prisma.challenge.upsert({
+        where: { name: "Diferenciação de Notas Musicais" },
+        update: {
             description: "Desafie-se a distinguir entre diferentes notas musicais!",
             requirements: "Não é necessário nenhum conhecimento prévio!",
+            instructions: "Ouça a nota alvo e selecione a opção correta entre as alternativas.",
+            isStatic: 1,
+            identifier: "notes-differentiation",
+        },
+        create: {
+            name: "Diferenciação de Notas Musicais",
+            identifier: "notes-differentiation",
+            description: "Desafie-se a distinguir entre diferentes notas musicais!",
+            requirements: "Não é necessário nenhum conhecimento prévio!",
+            instructions: "Ouça a nota alvo e selecione a opção correta entre as alternativas.",
             isStatic: 1
         },
     });
 
-    const parameters = await seedNotesDifferentiationParameters(challenge.id);
+    const parameters = await seedNotesDifferentiationParameters();
     await seedNotesDifferentiationLevels(challenge.id, parameters);
 }
 
-async function seedNotesDifferentiationParameters(challengeId: number) {
-    const optionsNumberParam = await prisma.parameter.create({data: 
-        {
-            name: "Número de opções",
-            description: "Define o número de opções (notas musicais) a serem comparadas.",
-            challengeId: challengeId,
-        },
+async function seedNotesDifferentiationParameters() {
+    const optionsNumberParam = await prisma.parameter.upsert({
+        where: { name: "Número de opções" },
+      update: { description: "Define o número de opções (notas musicais) a serem comparadas.", identifier: "numero-de-opcoes" },
+      create: { name: "Número de opções", description: "Define o número de opções (notas musicais) a serem comparadas.", identifier: "numero-de-opcoes" },
     });
-    const optionsReplayParam = await prisma.parameter.create({data:
-        {
-            name: "Replay de opções",
-            description: "Permite que o usuário ouça as notas de cada opção novamente.",
-            challengeId: challengeId,
-        }
+    const optionsReplayParam = await prisma.parameter.upsert({
+        where: { name: "Replay de opções" },
+      update: { description: "Permite que o usuário ouça as notas de cada opção novamente.", identifier: "replay-de-opcoes" },
+      create: { name: "Replay de opções", description: "Permite que o usuário ouça as notas de cada opção novamente.", identifier: "replay-de-opcoes" },
     });
-    const targetReplayParam = await prisma.parameter.create({data:
-        {
-            name: "Replay de nota alvo",
-            description: "Permite que o usuário ouça a nota alvo novamente.",
-            challengeId: challengeId,
-        }
+    const targetReplayParam = await prisma.parameter.upsert({
+        where: { name: "Replay de nota alvo" },
+      update: { description: "Permite que o usuário ouça a nota alvo novamente.", identifier: "replay-nota-alvo" },
+      create: { name: "Replay de nota alvo", description: "Permite que o usuário ouça a nota alvo novamente.", identifier: "replay-nota-alvo" },
     });
 
     return {
@@ -64,7 +68,9 @@ async function seedNotesDifferentiationLevels(challengeId: number, parameters: a
         optionsNumberParamId, optionsReplayParamId,
         targetReplayParamId
     } = parameters;
-    await prisma.level.create({data: {
+    const existingBeginner = await prisma.level.findFirst({ where: { name: "Iniciante", challengeId } });
+    if (!existingBeginner) {
+      await prisma.level.create({data: {
         name: "Iniciante",
         challengeId: challengeId,
         numRounds: 10,
@@ -85,8 +91,11 @@ async function seedNotesDifferentiationLevels(challengeId: number, parameters: a
                 }
             ]
         }
-    }});
-    await prisma.level.create({data: {
+      }});
+    }
+    const existingInter = await prisma.level.findFirst({ where: { name: "Intermediário", challengeId } });
+    if (!existingInter) {
+      await prisma.level.create({data: {
         name: "Intermediário",
         challengeId: challengeId,
         numRounds: 10,
@@ -107,8 +116,11 @@ async function seedNotesDifferentiationLevels(challengeId: number, parameters: a
                 }
             ]
         }
-    }});
-    await prisma.level.create({data: {
+      }});
+    }
+    const existingAdv = await prisma.level.findFirst({ where: { name: "Avançado", challengeId } });
+    if (!existingAdv) {
+      await prisma.level.create({data: {
         name: "Avançado",
         challengeId: challengeId,
         numRounds: 10,
@@ -129,7 +141,8 @@ async function seedNotesDifferentiationLevels(challengeId: number, parameters: a
                 }
             ]
         }
-    }});
+      }});
+    }
 }
 
 async function seedIntervalRecognitionChallenge() {

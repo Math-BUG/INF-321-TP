@@ -16,7 +16,6 @@ async function loadChallenges(setLoading: any, setChallenges: any) {
     setLoading(true);
     try {
         const data = await fetchChallenges();
-        console.log(data);
         setChallenges(data)
     } catch (error) {
         console.error("Erro ao buscar desafios:", error)
@@ -33,7 +32,6 @@ export default function ChallengesList({ initialChallenges }: ChallengesListProp
 
   // Fetch challenges on mount and when component needs refresh
   useEffect(() => {
-    console.log("Loading challenges...");
     loadChallenges(setLoading, setChallenges);
   }, [])
 
@@ -46,8 +44,9 @@ export default function ChallengesList({ initialChallenges }: ChallengesListProp
 
   const handlePlay = (challengeId: number) => {
     const selectedLevel = selectedLevels[challengeId]
-    if (!selectedLevel) return
-    router.push(`/play?challengeId=${challengeId}&levelId=${selectedLevel}`)
+    if (!selectedLevel) return;
+    router.push(`/play?challengeId=${challengeId}&levelId=${selectedLevel}`);
+    router.refresh();
   }
 
   if (loading && challenges.length === 0) {
@@ -98,6 +97,12 @@ export default function ChallengesList({ initialChallenges }: ChallengesListProp
                           {challenge.requirements && (
                             <Paragraph>
                               <Text strong>Requisitos:</Text> {challenge.requirements}
+                            </Paragraph>
+                          )}
+
+                          {challenge.instructions && (
+                            <Paragraph>
+                              <Text strong>Instruções:</Text> {challenge.instructions}
                             </Paragraph>
                           )}
 

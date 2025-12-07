@@ -13,6 +13,8 @@ export type Challenge = {
   name: string
   description?: string | null
   requirements?: string | null
+  identifier?: string | null
+  instructions?: string | null
   levels: Level[]
 }
 
@@ -27,6 +29,8 @@ export async function fetchChallenges(): Promise<Challenge[]> {
     name: c.name,
     description: c.description,
     requirements: c.requirements,
+    identifier: c.identifier,
+    instructions: c.instructions,
     levels: (c.levels || []).map((l: any) => ({
       id: l.id,
       name: l.name,

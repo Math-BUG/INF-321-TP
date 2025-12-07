@@ -15,13 +15,14 @@ datasource db {
 model Challenge {
   id           Int       @id @default(autoincrement())
   name         String    @unique
+  identifier   String?   @unique @default(cuid())
   description  String?
   requirements String?
+  instructions String?
   isStatic     Int       @default(0) // 0/1 (DER: is_static : INTEGER)
   createdAt    DateTime  @default(now())
 
   // relations
-  parameters   Parameter[]
   levels       Level[]
 
   @@map("challenges")
@@ -29,15 +30,12 @@ model Challenge {
 
 model Parameter {
   id          Int      @id @default(autoincrement())
-  challengeId Int
   name        String   @unique
   description String?
+  identifier  String?  @unique @default(cuid())
 
   // relations
-  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
   levelValues LevelParameterValue[]
-
-  @@index([challengeId])
   @@map("parameters")
 }
 
