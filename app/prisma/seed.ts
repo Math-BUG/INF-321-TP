@@ -29,6 +29,30 @@ async function main() {
   });
 
   console.log("Seeded admin:", adminEmail);
+
+  // Create a non-admin test user (bcrypt)
+  const testEmail = process.env.TEST_EMAIL || "test@example.com";
+  const testPassword = process.env.TEST_PASSWORD || "Password123";
+  const testHashed = await bcrypt.hash(testPassword, 10);
+
+  await prisma.user.upsert({
+    where: { email: testEmail },
+    update: {
+      name: "Test User",
+      passwordHash: testHashed,
+      isAdmin: 0,
+      sex: "N/A",
+    },
+    create: {
+      name: "Test User",
+      email: testEmail,
+      passwordHash: testHashed,
+      isAdmin: 0,
+      sex: "N/A",
+    },
+  });
+
+  console.log("Seeded test user:", testEmail);
 }
 
 main()

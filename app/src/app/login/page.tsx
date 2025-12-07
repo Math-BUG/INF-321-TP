@@ -40,14 +40,14 @@ export default function LoginPage() {
             });
 
             notification.success({
-                message: `Bem-vindo, ${body.name}`
+                title: `Bem-vindo, ${body.name}`
             });
             // Redirect to home page after successful login
             router.push("/");
         } catch (err) {
             console.error(err);
             notification.error({ 
-                message: "Erro ao realizar o login!"
+                title: "Erro ao realizar o login!"
             });
         } finally {
             setLoading(false);

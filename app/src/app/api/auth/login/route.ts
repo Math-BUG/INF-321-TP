@@ -36,18 +36,18 @@ export async function POST(req: Request) {
     const { email, password } = body || {};
 
     if (!email || !password) {
-      return NextResponse.json({ error: "Missing email or password" }, { status: 400 });
+      return NextResponse.json({ error: "Faltando e-mail ou senha" }, { status: 400 });
     }
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+      return NextResponse.json({ error: "Credenciais inválidas" }, { status: 401 });
     }
 
     const storedHash = (user as any).password || (user as any).passwordHash || "";
     const match = await verifyPassword(password, storedHash);
     if (!match) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+      return NextResponse.json({ error: "Credenciais inválidas" }, { status: 401 });
     }
 
     // NOTE: This returns the user data. In a production app you should return a session token

@@ -14,12 +14,12 @@ export async function POST(req: Request) {
     const { name, email, password, sex, phone, birthDate, address, previousExperience } = body || {};
 
     if (!name || !email || !password) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+      return NextResponse.json({ error: "Faltando campos obrigatórios" }, { status: 400 });
     }
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
-      return NextResponse.json({ error: "Email already in use" }, { status: 409 });
+      return NextResponse.json({ error: "Email já está em uso" }, { status: 409 });
     }
 
     const hashed = hashPassword(password);

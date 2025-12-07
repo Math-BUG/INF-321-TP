@@ -16,7 +16,7 @@ export async function proxy(request: NextRequest) {
     if (authenticated && authCookie?.value) {
         try {
             const user = JSON.parse(authCookie.value);
-            isAdmin = user.isAdmin || false;
+            isAdmin = !!user.isAdmin || false;
         } catch (e) {
             // Cookie is malformed; treat as not authenticated
         }
@@ -30,15 +30,14 @@ export async function proxy(request: NextRequest) {
             );
         }
     } else {
-        // Redirect authenticated users away from login/register pages
         if (notAuthenticatedPages.includes(request.nextUrl.pathname)) {
             return NextResponse.redirect(
                 new URL('/', request.url)
             );
         }
         
-        // Restrict /manage routes to admins only
         if (!isAdmin && request.nextUrl.pathname.startsWith('/manage')) {
+            console.log("Redirecting non-admin from admin page");
             return NextResponse.redirect(
                 new URL('/', request.url)
             );
