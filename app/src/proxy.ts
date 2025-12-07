@@ -1,37 +1,47 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "./lib/prisma";
 
 export async function proxy(request: NextRequest) {
     const notAuthenticatedPages = ['/login', '/register'];
-
-    const users = await prisma.user.findMany();
-
-    const authenticated = false;
-    const typeUser: string = "admin";
-
+    
+    // Skip middleware for API routes early to avoid touching DB for API calls
     if (request.nextUrl.pathname.startsWith('/api')) {
         return NextResponse.next();
     }
-    if (
-        !authenticated
-    ) {
+
+    // Check authentication via cookie instead of DB query
+    const authCookie = request.cookies.get("auth");
+    const authenticated = !!authCookie?.value;
+    
+    let isAdmin = false;
+    if (authenticated && authCookie?.value) {
+        try {
+            const user = JSON.parse(authCookie.value);
+            isAdmin = user.isAdmin || false;
+        } catch (e) {
+            // Cookie is malformed; treat as not authenticated
+        }
+    }
+
+    // Redirect unauthenticated users away from protected pages
+    if (!authenticated) {
         if (!notAuthenticatedPages.includes(request.nextUrl.pathname)) {
             return NextResponse.redirect(
                 new URL('/login', request.url)
             );
         }
     } else {
+        // Redirect authenticated users away from login/register pages
         if (notAuthenticatedPages.includes(request.nextUrl.pathname)) {
-            return  NextResponse.redirect(
+            return NextResponse.redirect(
                 new URL('/', request.url)
             );
         }
-        if (typeUser === "default") {
-            if (request.nextUrl.pathname.startsWith('/manage')) {
-                return NextResponse.redirect(
-                    new URL('/', request.url)
-                );
-            }
+        
+        // Restrict /manage routes to admins only
+        if (!isAdmin && request.nextUrl.pathname.startsWith('/manage')) {
+            return NextResponse.redirect(
+                new URL('/', request.url)
+            );
         }
     }
 

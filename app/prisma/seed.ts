@@ -15,15 +15,15 @@ async function main() {
     where: { email: adminEmail },
     update: {
       name: "Admin",
-      password: hashed,
-      isAdmin: true,
+      passwordHash: hashed,
+      isAdmin: 1,
       sex: "N/A",
     },
     create: {
       name: "Admin",
       email: adminEmail,
-      password: hashed,
-      isAdmin: true,
+      passwordHash: hashed,
+      isAdmin: 1,
       sex: "N/A",
     },
   });

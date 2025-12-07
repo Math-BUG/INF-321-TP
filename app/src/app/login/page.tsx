@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Card, Form, Input, Button, Typography, Space, notification } from "antd";
 import { MailOutlined, LockOutlined } from "@ant-design/icons";
+import { setAuthCookie } from "../actions/auth";
 
 const { Title, Text } = Typography;
 
@@ -16,31 +17,37 @@ export default function LoginPage() {
     async function onFinish(values: { email: string; password: string }) {
         setLoading(true);
         try {
-            console.log("BEFORE");
             const res = await fetch("/api/auth/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(values),
             });
-            console.log(res);
             const body = await res.json();
-            console.log("TESTE");
-            console.log(body);
             if (!res.ok) {
                 notification.error({
-                    title: "Login failed", description: body.error || "Invalid credentials"});
+                    title: "Falha no login", 
+                    description: body.error || "Credenciais inválidas"
+                });
                 return;
             }
 
-            notification.success({
-                title: `Bem-vindo, ${body.name}`
+            // Set auth cookie with user data
+            await setAuthCookie({
+                id: body.id,
+                name: body.name,
+                email: body.email,
+                isAdmin: body.isAdmin,
             });
-            // TODO: set session/cookie — for now redirect to profile
-            router.push("/profile");
+
+            notification.success({
+                message: `Bem-vindo, ${body.name}`
+            });
+            // Redirect to home page after successful login
+            router.push("/");
         } catch (err) {
-            console.log(err);
+            console.error(err);
             notification.error({ 
-                title: "Login error", description: String(err)
+                message: "Erro ao realizar o login!"
             });
         } finally {
             setLoading(false);

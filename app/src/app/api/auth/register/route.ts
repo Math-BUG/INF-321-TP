@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
 import prisma from "../../../../lib/prisma";
+import { scryptSync, randomBytes } from "crypto";
+
+function hashPassword(password: string): string {
+  const salt = randomBytes(16).toString("hex");
+  const key = scryptSync(password, salt, 64).toString("hex");
+  return `${salt}:${key}`;
+}
 
 export async function POST(req: Request) {
   try {
@@ -16,23 +22,24 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Email already in use" }, { status: 409 });
     }
 
-    const hashed = await bcrypt.hash(password, 10);
+    const hashed = hashPassword(password);
 
     const user = await prisma.user.create({
       data: {
         name,
         email,
-        password: hashed,
+        passwordHash: hashed,
         sex: sex || "",
         phone: phone || null,
-        birthDate: birthDate ? new Date(birthDate) : null,
+        birthdate: birthDate ? new Date(birthDate) : null,
         address: address || null,
-        previousExperience: previousExperience ?? false,
+        musicExperience: typeof previousExperience === 'string' ? previousExperience : (previousExperience ? 'yes' : 'no'),
       },
     });
 
     return NextResponse.json({ id: user.id, name: user.name, email: user.email });
   } catch (err) {
+    console.error('Register handler error:', err);
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }
