@@ -93,8 +93,9 @@ export function Navigation({
           width={250}
           style={{ background: "#f0f2f5" }}
           collapsible
-          collapsedWidth={0}
+          collapsedWidth={80}
           defaultCollapsed={false}
+          trigger={null}
         >
           <Menu
             mode="inline"
@@ -111,7 +112,7 @@ export function Navigation({
           />
         </Layout.Sider>
 
-        <Layout.Content style={{ padding: "24px" }}>
+        <Layout.Content style={{ padding: "24px 24px 24px 24px", overflow: "auto" }}>
           {children}
         </Layout.Content>
       </Layout>

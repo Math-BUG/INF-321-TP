@@ -69,83 +69,84 @@ export default function ChallengesList({ initialChallenges }: ChallengesListProp
 
   return (
     <Spin spinning={loading}>
-      <Row gutter={[16, 16]}>
+      <Row gutter={[24, 24]}>
         {challenges.map((challenge) => (
-          <Col key={challenge.id} xs={24} sm={24} md={24} lg={24}>
+          <Col key={challenge.id} xs={24} sm={24} md={12} lg={12} xl={12}>
             <Card
               hoverable
               style={{
                 borderRadius: 8,
                 boxShadow: "0 2px 8px rgba(0, 0, 0, 0.06)",
+                height: "100%",
               }}
             >
-              <Collapse
-                items={[
-                  {
-                    key: String(challenge.id),
-                    label: (
-                      <div style={{ fontWeight: 600, fontSize: 16 }}>
-                        {challenge.name}
-                      </div>
-                    ),
-                    children: (
-                      <div>
-                        {challenge.description && (
-                          <Paragraph>{challenge.description}</Paragraph>
-                        )}
+                <Collapse
+                  items={[
+                    {
+                      key: String(challenge.id),
+                      label: (
+                        <div style={{ fontWeight: 600, fontSize: 16 }}>
+                          {challenge.name}
+                        </div>
+                      ),
+                      children: (
+                        <div>
+                          {challenge.description && (
+                            <Paragraph>{challenge.description}</Paragraph>
+                          )}
 
-                        {challenge.requirements && (
-                          <Paragraph>
-                            <Text strong>Requisitos:</Text> {challenge.requirements}
-                          </Paragraph>
-                        )}
+                          {challenge.requirements && (
+                            <Paragraph>
+                              <Text strong>Requisitos:</Text> {challenge.requirements}
+                            </Paragraph>
+                          )}
 
-                        <Space
-                          orientation="vertical"
-                          style={{ marginTop: 16, width: "100%" }}
-                        >
-                          <Space style={{ width: "100%" }}>
-                            <Select
-                              value={selectedLevels[challenge.id] ?? undefined}
-                              onChange={(v) =>
-                                handleLevelChange(challenge.id, Number(v))
-                              }
-                              style={{ minWidth: 250 }}
-                              placeholder={
-                                challenge.levels.length
-                                  ? "Selecione um nível"
-                                  : "Sem níveis disponíveis"
-                              }
-                              disabled={!challenge.levels.length}
-                            >
-                              {challenge.levels.map((level) => (
-                                <Select.Option
-                                  key={level.id}
-                                  value={level.id}
-                                >
-                                  {level.name}
-                                  {level.difficulty
-                                    ? ` — ${level.difficulty}`
-                                    : ""}
-                                </Select.Option>
-                              ))}
-                            </Select>
+                          <Space
+                            orientation="vertical"
+                            style={{ marginTop: 16, width: "100%" }}
+                          >
+                            <Space style={{ width: "100%" }}>
+                              <Select
+                                value={selectedLevels[challenge.id] ?? undefined}
+                                onChange={(v) =>
+                                  handleLevelChange(challenge.id, Number(v))
+                                }
+                                style={{ minWidth: 250 }}
+                                placeholder={
+                                  challenge.levels.length
+                                    ? "Selecione um nível"
+                                    : "Sem níveis disponíveis"
+                                }
+                                disabled={!challenge.levels.length}
+                              >
+                                {challenge.levels.map((level) => (
+                                  <Select.Option
+                                    key={level.id}
+                                    value={level.id}
+                                  >
+                                    {level.name}
+                                    {level.difficulty
+                                      ? ` — ${level.difficulty}`
+                                      : ""}
+                                  </Select.Option>
+                                ))}
+                              </Select>
 
-                            <Button
-                              type="primary"
-                              size="large"
-                              onClick={() => handlePlay(challenge.id)}
-                              disabled={!selectedLevels[challenge.id]}
-                            >
-                              Jogar
-                            </Button>
+                              <Button
+                                type="primary"
+                                size="large"
+                                onClick={() => handlePlay(challenge.id)}
+                                disabled={!selectedLevels[challenge.id]}
+                              >
+                                Jogar
+                              </Button>
+                            </Space>
                           </Space>
-                        </Space>
-                      </div>
-                    ),
-                  },
-                ]}
-              />
+                        </div>
+                      ),
+                    },
+                  ]}
+                />
             </Card>
           </Col>
         ))}
