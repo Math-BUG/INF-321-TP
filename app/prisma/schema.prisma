@@ -14,7 +14,7 @@ datasource db {
 
 model Challenge {
   id           Int       @id @default(autoincrement())
-  name         String
+  name         String    @unique
   description  String?
   requirements String?
   isStatic     Int       @default(0) // 0/1 (DER: is_static : INTEGER)
@@ -30,7 +30,7 @@ model Challenge {
 model Parameter {
   id          Int      @id @default(autoincrement())
   challengeId Int
-  name        String
+  name        String   @unique
   description String?
 
   // relations
@@ -44,7 +44,7 @@ model Parameter {
 model Level {
   id            Int      @id @default(autoincrement())
   challengeId   Int
-  name          String
+  name          String   @unique
   numRounds     Int
   timePerRound  Int
   createdAt     DateTime @default(now())
