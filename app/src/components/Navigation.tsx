@@ -16,6 +16,7 @@ interface NavigationProps {
     label: string;
     href: string;
   }>;
+  children?: React.ReactNode;
 }
 
 export function Navigation({
@@ -23,6 +24,7 @@ export function Navigation({
   userEmail,
   isAdmin,
   items,
+  children,
 }: NavigationProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -110,7 +112,7 @@ export function Navigation({
         </Layout.Sider>
 
         <Layout.Content style={{ padding: "24px" }}>
-          {/* Content will be rendered by child pages */}
+          {children}
         </Layout.Content>
       </Layout>
     </Layout>

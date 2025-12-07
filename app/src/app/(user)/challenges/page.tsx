@@ -1,11 +1,17 @@
-import { Breadcrumb, Empty } from "antd";
+import { Breadcrumb } from "antd";
+import { fetchChallenges } from "../../actions/challenges";
+import ChallengesList from "../../../components/ChallengesList";
 
-export default function ChallengesPage() {
+export default async function ChallengesPage() {
+  // Fetch initial challenges on server side
+  const initialChallenges = await fetchChallenges();
+  console.log(initialChallenges);
+
   return (
     <div>
       <Breadcrumb items={[{ title: "Desafios" }]} style={{ marginBottom: 16 }} />
       <h1>Desafios Musicais</h1>
-      <Empty description="Conteúdo de desafios será implementado em breve" style={{ marginTop: 48 }} />
+      <ChallengesList initialChallenges={initialChallenges} />
     </div>
   );
 }
