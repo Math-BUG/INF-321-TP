@@ -169,16 +169,30 @@ export default function RoundUI({
     let animationDuration = 2000; // 2 seconds per option
     
     // Play sound immediately when step changes
-    if (animationStep < numOptions) {
-      // Playing options
-      playNote(optionNotes[animationStep], "1n");
-    } else if (animationStep === numOptions) {
-      // Play target note
-      setTargetPlayed(true);
-      playNote(targetNote, "1n");
-      setTimeout(() => setTargetPlayed(false), animationDuration/2);
-      animationDuration = 0; // Shorter wait after target note (0.5 seconds)
-    }
+    const playSoundForStep = async () => {
+      // Ensure audio context is started before playing
+      if (!audioInitialized.current && synthRef.current) {
+        try {
+          await Tone.start();
+          audioInitialized.current = true;
+        } catch (error) {
+          console.error("Error starting Tone.js:", error);
+        }
+      }
+
+      if (animationStep < numOptions) {
+        // Playing options
+        await playNote(optionNotes[animationStep], "1n");
+      } else if (animationStep === numOptions) {
+        // Play target note
+        setTargetPlayed(true);
+        await playNote(targetNote, "1n");
+        setTimeout(() => setTargetPlayed(false), animationDuration/2);
+        animationDuration = 0;
+      }
+    };
+
+    playSoundForStep();
 
     const delay = setTimeout(() => {
       if (animationStep < numOptions) {
@@ -412,6 +426,10 @@ export default function RoundUI({
                 buttonColor = "#3b82f6";
                 borderColor = "#1d4ed8";
               }
+            } else if (phase === "running" && playedOptions.has(optionNum)) {
+              // When replaying option during running phase, show blue
+              buttonColor = "#3b82f6";
+              borderColor = "#1d4ed8";
             } else if (selectedOption === optionNum && phase === "result") {
               // Show selected option color
               if (optionNum === correctOption) {
@@ -437,7 +455,7 @@ export default function RoundUI({
               >
                 <button
                   onClick={() => handleOptionPlay(optionNum)}
-                  disabled={(phase === "running" && !canReplayOptions) || (phase !== "animation" && phase !== "running") || isPaused}
+                  disabled={phase !== "running" || !canReplayOptions || isPaused}
                   style={{
                     width: 60,
                     height: 60,
@@ -446,11 +464,11 @@ export default function RoundUI({
                     background: isPlayButtonActive ? "#3b82f6" : "transparent",
                     color: isPlayButtonActive ? "white" : "#cbd5e1",
                     fontSize: 20,
-                    cursor: (phase === "animation" || (phase === "running" && canReplayOptions)) && !isPaused ? "pointer" : "not-allowed",
+                    cursor: phase === "running" && canReplayOptions && !isPaused ? "pointer" : "not-allowed",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    opacity: isPaused || (phase === "running" && !canReplayOptions) ? 0.5 : 1,
+                    opacity: phase !== "running" || !canReplayOptions || isPaused ? 0.5 : 1,
                   }}
                 >
                   ♪
