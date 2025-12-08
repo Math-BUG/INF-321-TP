@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react"
 import { Card, Collapse, Select, Button, Space, Typography, Empty, Row, Col, Spin } from "antd"
 import { useRouter } from "next/navigation"
 import { fetchChallenges, type Challenge } from "../app/actions/challenges"
+import OngoingMatchModal, { getOngoingMatch, clearOngoingMatch } from "./OngoingMatchModal"
 
 const { Paragraph, Text } = Typography
 
@@ -29,6 +30,20 @@ export default function ChallengesList({ initialChallenges }: ChallengesListProp
   const [challenges, setChallenges] = useState<Challenge[]>(initialChallenges)
   const [selectedLevels, setSelectedLevels] = useState<{ [key: number]: number | null }>({})
   const [loading, setLoading] = useState(false);
+  const [ongoingMatch, setOngoingMatch] = useState<any>(null);
+  const [showOngoingModal, setShowOngoingModal] = useState(false);
+
+  // Check for ongoing match on mount (client-side only)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const match = getOngoingMatch();
+      console.log("Checking for ongoing match:", match);
+      if (match) {
+        setOngoingMatch(match);
+        setShowOngoingModal(true);
+      }
+    }
+  }, []);
 
   // Fetch challenges on mount and when component needs refresh
   useEffect(() => {
@@ -49,6 +64,18 @@ export default function ChallengesList({ initialChallenges }: ChallengesListProp
     router.refresh();
   }
 
+  const handleResumeMatch = () => {
+    if (!ongoingMatch) return;
+    setShowOngoingModal(false);
+    router.push(`/play?challengeId=${ongoingMatch.challengeId}&levelId=${ongoingMatch.levelId}&resume=true`);
+  };
+
+  const handleDiscardMatch = () => {
+    clearOngoingMatch();
+    setOngoingMatch(null);
+    setShowOngoingModal(false);
+  };
+
   if (loading && challenges.length === 0) {
     return (
       <div style={{ display: "flex", justifyContent: "center", marginTop: 48 }}>
@@ -68,6 +95,12 @@ export default function ChallengesList({ initialChallenges }: ChallengesListProp
 
   return (
     <Spin spinning={loading}>
+      <OngoingMatchModal
+        matchData={ongoingMatch}
+        visible={showOngoingModal}
+        onResume={handleResumeMatch}
+        onDiscard={handleDiscardMatch}
+      />
       <Row gutter={[24, 24]}>
         {challenges.map((challenge) => (
           <Col key={challenge.id} xs={24} sm={24} md={12} lg={12} xl={12}>
@@ -97,12 +130,6 @@ export default function ChallengesList({ initialChallenges }: ChallengesListProp
                           {challenge.requirements && (
                             <Paragraph>
                               <Text strong>Requisitos:</Text> {challenge.requirements}
-                            </Paragraph>
-                          )}
-
-                          {challenge.instructions && (
-                            <Paragraph>
-                              <Text strong>Instruções:</Text> {challenge.instructions}
                             </Paragraph>
                           )}
 

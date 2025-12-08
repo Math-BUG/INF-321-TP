@@ -55,18 +55,34 @@ async function seedNotesDifferentiationParameters() {
       update: { description: "Permite que o usuário ouça a nota alvo novamente.", identifier: "replay-nota-alvo" },
       create: { name: "Replay de nota alvo", description: "Permite que o usuário ouça a nota alvo novamente.", identifier: "replay-nota-alvo" },
     });
+    
+    // Check if pause parameter exists first
+    let canPauseParam = await prisma.parameter.findFirst({
+        where: { identifier: "pode-pausar" }
+    });
+    
+    if (!canPauseParam) {
+        canPauseParam = await prisma.parameter.create({
+            data: { 
+                name: "Pode pausar", 
+                description: "Permite que o usuário pause a rodada durante o tempo corrido.", 
+                identifier: "pode-pausar" 
+            }
+        });
+    }
 
     return {
         optionsNumberParamId: optionsNumberParam.id,
         optionsReplayParamId: optionsReplayParam.id,
         targetReplayParamId: targetReplayParam.id,
+        canPauseParamId: canPauseParam.id,
     };
 }
 
 async function seedNotesDifferentiationLevels(challengeId: number, parameters: any) {
     const {
         optionsNumberParamId, optionsReplayParamId,
-        targetReplayParamId
+        targetReplayParamId, canPauseParamId
     } = parameters;
     const existingBeginner = await prisma.level.findFirst({ where: { name: "Iniciante", challengeId } });
     if (!existingBeginner) {
@@ -87,6 +103,10 @@ async function seedNotesDifferentiationLevels(challengeId: number, parameters: a
                 },
                 {
                     parameterId: targetReplayParamId,
+                    value: 'true',
+                },
+                {
+                    parameterId: canPauseParamId,
                     value: 'true',
                 }
             ]
@@ -113,6 +133,10 @@ async function seedNotesDifferentiationLevels(challengeId: number, parameters: a
                 {
                     parameterId: targetReplayParamId,
                     value: 'true',
+                },
+                {
+                    parameterId: canPauseParamId,
+                    value: 'false',
                 }
             ]
         }
@@ -137,6 +161,10 @@ async function seedNotesDifferentiationLevels(challengeId: number, parameters: a
                 },
                 {
                     parameterId: targetReplayParamId,
+                    value: 'false',
+                },
+                {
+                    parameterId: canPauseParamId,
                     value: 'false',
                 }
             ]
