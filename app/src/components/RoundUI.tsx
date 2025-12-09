@@ -171,7 +171,6 @@ export default function RoundUI({
         setTargetPlayed(true);
         await playNote(targetNote, "1n");
         setTimeout(() => setTargetPlayed(false), animationDuration/2);
-        animationDuration = 0;
       }
     };
 
@@ -181,8 +180,6 @@ export default function RoundUI({
       if (animationStep < numOptions) {
         setAnimationStep(animationStep + 1);
       } else if (animationStep === numOptions) {
-        setAnimationStep(animationStep + 1);
-      } else {
         setPhase("running");
         setTimeRemaining(timePerRound * 1000);
       }
