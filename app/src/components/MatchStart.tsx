@@ -12,7 +12,7 @@ type Props = {
   name: string;
   instructions?: string | null;
   levels?: Array<{ id: number; name: string }>;
-  userId?: number;
+  userId: number;
 };
 
 type GameState = "start" | "playing" | "finished";
@@ -23,7 +23,7 @@ export default function MatchStart({
   name, 
   instructions, 
   levels = [],
-  userId = 1 // TODO: get from session/context
+  userId
 }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -43,14 +43,13 @@ export default function MatchStart({
   const [challengeIdentifier, setChallengeIdentifier] = useState("notes-differentiation");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Check if we should resume from cookie
+  // Verifica se deve retomar partida do cookie
   useEffect(() => {
     if (shouldResume) {
       const ongoingMatch = getOngoingMatch();
       if (ongoingMatch && 
           ongoingMatch.challengeId === challengeId && 
           ongoingMatch.levelId === initialLevelId) {
-        // Resume match from cookie
         resumeMatch(ongoingMatch);
       }
     }
@@ -73,7 +72,6 @@ export default function MatchStart({
       setTimePerRound(levelDetails.timePerRound);
       setChallengeIdentifier(levelDetails.challenge?.identifier || "notes-differentiation");
 
-      // Parse parameters
       const paramMap: Record<string, string> = {};
       levelDetails.parameterVals.forEach((pv) => {
         if (pv.parameter?.identifier) {
@@ -112,7 +110,6 @@ export default function MatchStart({
     console.log("Setting cookie:", cookieString);
     document.cookie = cookieString;
     
-    // Verify cookie was set
     setTimeout(() => {
       const cookies = document.cookie;
       console.log("All cookies after setting:", cookies);
@@ -121,7 +118,7 @@ export default function MatchStart({
     }, 100);
   };
 
-  // Clear match cookie
+  // Limpa cookie da partida
   const clearMatchCookie = () => {
     document.cookie = 'ongoingMatch=; path=/; max-age=0';
     console.log("Cleared match cookie");
@@ -142,7 +139,6 @@ export default function MatchStart({
 
     setIsLoading(true);
     try {
-      // Fetch level details
       const levelDetails = await fetchLevelDetails(selectedLevelId);
       if (!levelDetails) {
         alert("N\u00edvel n\u00e3o encontrado!");
@@ -153,7 +149,6 @@ export default function MatchStart({
       setTimePerRound(levelDetails.timePerRound);
       setChallengeIdentifier(levelDetails.challenge?.identifier || "notes-differentiation");
 
-      // Parse parameters
       const paramMap: Record<string, string> = {};
       levelDetails.parameterVals.forEach((pv) => {
         if (pv.parameter?.identifier) {
@@ -186,11 +181,9 @@ export default function MatchStart({
     if (currentRound < totalRounds) {
       const nextRound = currentRound + 1;
       setCurrentRound(nextRound);
-      // Save progress to cookie with updated values
       console.log("Saving cookie - Round:", nextRound, "Correct:", newCorrect, "Incorrect:", newIncorrect, "Total rounds:", totalRounds);
       saveMatchToCookie(nextRound, newCorrect, newIncorrect);
     } else {
-      // Match finished - persist to database
       handleMatchFinish(newCorrect, newIncorrect);
     }
   };
@@ -199,10 +192,8 @@ export default function MatchStart({
     if (!selectedLevelId) return;
 
     try {
-      // Create match in database only when complete
       const newMatch = await createMatch(userId, selectedLevelId);
       
-      // Immediately update it with final results
       await updateMatchResults(
         newMatch.id,
         finalCorrect,
@@ -210,7 +201,6 @@ export default function MatchStart({
         totalRounds
       );
       
-      // Clear cookie since match is now persisted
       clearMatchCookie();
       
       setGameState("finished");

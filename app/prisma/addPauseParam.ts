@@ -28,7 +28,6 @@ async function main() {
     return;
   }
 
-  // Get all levels for this challenge
   const levels = await prisma.level.findMany({
     where: { challengeId: challenge.id }
   });
@@ -36,8 +35,7 @@ async function main() {
   console.log(`Found ${levels.length} levels`);
 
   for (const level of levels) {
-    // Check if this level already has the pause parameter
-    const existing = await prisma.levelParameterValue.findFirst({
+    const existing = await prisma.parameterValue.findFirst({
       where: {
         levelId: level.id,
         parameterId: pauseParam.id
@@ -49,11 +47,9 @@ async function main() {
       continue;
     }
 
-    // Determine the value based on level name
-    const value = level.name === "Iniciante" ? "true" : "false";
+    const value = level.name.includes("Iniciante") ? "true" : "false";
 
-    // Add the parameter value
-    await prisma.levelParameterValue.create({
+    await prisma.parameterValue.create({
       data: {
         levelId: level.id,
         parameterId: pauseParam.id,

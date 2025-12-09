@@ -31,7 +31,6 @@ export function Navigation({
   const [selectedKey, setSelectedKey] = React.useState("");
 
   React.useEffect(() => {
-    // Set the selected menu key based on current pathname
     const currentItem = items.find((item) => pathname.includes(item.href));
     if (currentItem) {
       setSelectedKey(currentItem.key);

@@ -31,7 +31,6 @@ export default function LoginPage() {
                 return;
             }
 
-            // Set auth cookie with user data
             await setAuthCookie({
                 id: body.id,
                 name: body.name,
@@ -42,7 +41,6 @@ export default function LoginPage() {
             notification.success({
                 title: `Bem-vindo, ${body.name}`
             });
-            // Redirect to home page after successful login
             router.push("/");
         } catch (err) {
             console.error(err);

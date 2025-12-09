@@ -56,7 +56,6 @@ async function seedNotesDifferentiationParameters() {
       create: { name: "Replay de nota alvo", description: "Permite que o usuário ouça a nota alvo novamente.", identifier: "replay-nota-alvo" },
     });
     
-    // Check if pause parameter exists first
     let canPauseParam = await prisma.parameter.findFirst({
         where: { identifier: "pode-pausar" }
     });

@@ -11,7 +11,6 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
   const cookieStore = await cookies();
   const authCookie = cookieStore.get("auth");
 
-  // Check if user is authenticated
   if (!authCookie?.value) {
     redirect("/login");
   }
@@ -23,7 +22,6 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
     redirect("/login");
   }
 
-  // Check if user IS an admin (required for this route)
   if (!user || !user.isAdmin) {
     redirect("/user/challenges");
   }

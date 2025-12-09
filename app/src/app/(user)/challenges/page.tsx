@@ -3,7 +3,6 @@ import { fetchChallenges } from "../../actions/challenges";
 import ChallengesList from "../../../components/ChallengesList";
 
 export default async function ChallengesPage() {
-  // Fetch initial challenges on server side
   const initialChallenges = await fetchChallenges();
   console.log(initialChallenges);
 

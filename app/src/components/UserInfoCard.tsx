@@ -34,7 +34,6 @@ export default function UserInfoCard({ user, onUpdate }: UserInfoCardProps) {
       setLoading(true);
       const values = await form.validateFields();
       
-      // Convert dayjs to Date if birthdate exists
       const dataToUpdate = {
         ...values,
         birthdate: values.birthdate ? values.birthdate.toDate() : undefined,

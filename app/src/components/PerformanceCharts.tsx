@@ -18,32 +18,30 @@ type PerformanceChartsProps = {
   performanceData: PerformanceData[];
 };
 
-const LEVEL_COLORS: Record<string, string> = {
-  "Iniciante": "#10b981", // green
-  "Intermediário": "#f59e0b", // orange/yellow
-  "Avançado": "#ef4444", // red
+const DIFFICULTY_COLORS: Record<string, string> = {
+  "Iniciante": "#10b981",
+  "Intermediário": "#f59e0b",
+  "Avançado": "#ef4444",
 };
 
 const FALLBACK_COLORS = [
-  "#3b82f6", // blue
-  "#8b5cf6", // purple
-  "#ec4899", // pink
-  "#06b6d4", // cyan
-  "#84cc16", // lime
+  "#3b82f6",
+  "#8b5cf6",
+  "#ec4899",
+  "#06b6d4",
+  "#84cc16",
 ];
 
 function getLevelColor(levelName: string, index: number): string {
-  // Check if level name contains difficulty keywords
   if (levelName.includes("Iniciante")) {
-    return LEVEL_COLORS["Iniciante"];
+    return DIFFICULTY_COLORS["Iniciante"];
   }
   if (levelName.includes("Intermediário")) {
-    return LEVEL_COLORS["Intermediário"];
+    return DIFFICULTY_COLORS["Intermediário"];
   }
   if (levelName.includes("Avançado")) {
-    return LEVEL_COLORS["Avançado"];
+    return DIFFICULTY_COLORS["Avançado"];
   }
-  // Use fallback colors for other levels
   return FALLBACK_COLORS[index % FALLBACK_COLORS.length];
 }
 
@@ -64,7 +62,6 @@ export default function PerformanceCharts({ performanceData }: PerformanceCharts
     (d) => d.challengeId === selectedChallenge
   );
 
-  // Sort levels: Iniciante first, then Intermediário, then Avançado, then others
   const sortedLevels = currentChallenge ? [...currentChallenge.levels].sort((a, b) => {
     const getDifficultyOrder = (name: string) => {
       if (name.includes("Iniciante")) return 0;
@@ -75,15 +72,12 @@ export default function PerformanceCharts({ performanceData }: PerformanceCharts
     return getDifficultyOrder(a.levelName) - getDifficultyOrder(b.levelName);
   }) : [];
 
-  // Prepare chart data
   const chartData: any[] = [];
   if (currentChallenge && sortedLevels.length > 0) {
-    // Find the maximum number of matches across all levels
     const maxMatches = Math.max(
       ...sortedLevels.map((level) => level.matches.length)
     );
 
-    // Create data points for each match number
     for (let i = 0; i < maxMatches; i++) {
       const dataPoint: any = {
         matchNumber: i + 1,

@@ -33,7 +33,6 @@ export default function ChallengesList({ initialChallenges }: ChallengesListProp
   const [ongoingMatch, setOngoingMatch] = useState<any>(null);
   const [showOngoingModal, setShowOngoingModal] = useState(false);
 
-  // Check for ongoing match on mount (client-side only)
   useEffect(() => {
     if (typeof window !== "undefined") {
       const match = getOngoingMatch();
@@ -45,7 +44,6 @@ export default function ChallengesList({ initialChallenges }: ChallengesListProp
     }
   }, []);
 
-  // Fetch challenges on mount and when component needs refresh
   useEffect(() => {
     loadChallenges(setLoading, setChallenges);
   }, [])

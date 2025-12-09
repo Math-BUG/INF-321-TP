@@ -11,7 +11,6 @@ export default async function UserLayout({ children }: UserLayoutProps) {
   const cookieStore = await cookies();
   const authCookie = cookieStore.get("auth");
 
-  // Check if user is authenticated
   if (!authCookie?.value) {
     redirect("/login");
   }
@@ -23,7 +22,6 @@ export default async function UserLayout({ children }: UserLayoutProps) {
     redirect("/login");
   }
 
-  // Check if user is NOT an admin (this is a user-only route)
   if (user && user.isAdmin) {
     redirect("/manage-levels");
   }

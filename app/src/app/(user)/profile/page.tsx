@@ -2,15 +2,19 @@ import { Breadcrumb } from "antd";
 import { fetchUserProfile, fetchUserMatchHistory, fetchPerformanceData } from "../../actions/user";
 import ProfileContent from "../../../components/ProfileContent";
 import { redirect } from "next/navigation";
+import { getAuthUser } from "../../actions/auth";
 
 export default async function ProfilePage() {
-  // TODO: Get userId from session/context
-  const userId = 1;
+  const authUser = await getAuthUser();
+  
+  if (!authUser) {
+    redirect("/login");
+  }
 
   const [user, matchHistory, performanceData] = await Promise.all([
-    fetchUserProfile(userId),
-    fetchUserMatchHistory(userId),
-    fetchPerformanceData(userId),
+    fetchUserProfile(authUser.id),
+    fetchUserMatchHistory(authUser.id),
+    fetchPerformanceData(authUser.id),
   ]);
 
   if (!user) {

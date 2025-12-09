@@ -3,7 +3,7 @@ import prisma from "../../../../lib/prisma";
 import { scryptSync, timingSafeEqual } from "crypto";
 
 async function verifyPassword(password: string, storedHash: string): Promise<boolean> {
-  // If the stored hash looks like bcrypt ($2a$ or $2b$ etc), use bcrypt dynamically
+  // Se hash armazenado parece bcrypt ($2a$ ou $2b$), usa bcrypt
   if (storedHash && storedHash.startsWith("$2")) {
     try {
       const bcryptModule = await import("bcryptjs");
@@ -15,7 +15,7 @@ async function verifyPassword(password: string, storedHash: string): Promise<boo
     }
   }
 
-  // Otherwise assume format salt:hexkey (scrypt)
+  // Caso contrário assume formato salt:hexkey (scrypt)
   try {
     const [saltHex, keyHex] = (storedHash || "").split(":");
     if (!saltHex || !keyHex) return false;

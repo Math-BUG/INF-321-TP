@@ -138,7 +138,6 @@ export async function fetchPerformanceData(userId: number): Promise<PerformanceD
       },
     });
 
-    // Group by challenge and level
     const groupedData = new Map<number, PerformanceData>();
 
     matches.forEach((match) => {

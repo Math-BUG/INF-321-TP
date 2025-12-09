@@ -1,12 +1,20 @@
 import prisma from "../../lib/prisma";
 import MatchStart from "../../components/MatchStart";
+import { getAuthUser } from "../actions/auth";
+import { redirect } from "next/navigation";
 
 type Props = {
   searchParams?: Promise<{ [key: string]: string | undefined }>
 }
 
 export default async function PlayPage(params: Props) {
-    const searchParams = await params.searchParams;
+  const authUser = await getAuthUser();
+  
+  if (!authUser) {
+    redirect("/login");
+  }
+
+  const searchParams = await params.searchParams;
   const challengeIdParam = searchParams?.challengeId;
   const levelIdParam = searchParams?.levelId;
   const challengeId = challengeIdParam ? parseInt(challengeIdParam, 10) : null;
@@ -52,6 +60,7 @@ export default async function PlayPage(params: Props) {
       name={challenge.name}
       instructions={challenge.instructions}
       levels={challenge.levels}
+      userId={authUser.id}
     />
   );
 }

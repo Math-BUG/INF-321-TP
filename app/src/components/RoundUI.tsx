@@ -18,7 +18,7 @@ type RoundUIProps = {
 
 type Phase = "animation" | "running" | "result";
 
-// Musical notes range from C4 to B5 (more audible range)
+// Notas musicais de C4 a B5
 const NOTE_RANGE = [
   "C4", "C#4", "D4", "D#4", "E4", "F4", "F#4", "G4", "G#4", "A4", "A#4", "B4",
   "C5", "C#5", "D5", "D#5", "E5", "F5", "F#5", "G5", "G#5", "A5", "A#5", "B5"
@@ -37,7 +37,7 @@ export default function RoundUI({
   challengeIdentifier = "notes-differentiation"
 }: RoundUIProps) {
   const [phase, setPhase] = useState<Phase>("animation");
-  const [timeRemaining, setTimeRemaining] = useState(timePerRound * 1000); // in milliseconds
+  const [timeRemaining, setTimeRemaining] = useState(timePerRound * 1000);
   const [correctOption, setCorrectOption] = useState<number>(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [playedOptions, setPlayedOptions] = useState<Set<number>>(new Set());
@@ -51,7 +51,6 @@ export default function RoundUI({
   const errorSoundRef = useRef<Tone.Player | null>(null);
   const audioInitialized = useRef(false);
 
-  // Initialize Tone.js synth and sound effects
   useEffect(() => {
     if (typeof window !== "undefined" && !synthRef.current) {
       synthRef.current = new Tone.Synth({
@@ -67,7 +66,6 @@ export default function RoundUI({
         volume: -10
       }).toDestination();
       
-      // Add reverb for a smoother sound
       const reverb = new Tone.Reverb({
         decay: 2,
         preDelay: 0.01
@@ -75,10 +73,7 @@ export default function RoundUI({
       
       synthRef.current.connect(reverb);
 
-      // Initialize success sound (major chord arpeggio)
       successSoundRef.current = new Tone.Player().toDestination();
-      
-      // Initialize error sound (dissonant chord)
       errorSoundRef.current = new Tone.Player().toDestination();
     }
     return () => {
@@ -97,11 +92,9 @@ export default function RoundUI({
     };
   }, []);
 
-  // Function to play a note
   const playNote = async (note: string, duration: string = "1n") => {
     if (!synthRef.current) return;
     
-    // Initialize audio context on first interaction
     if (!audioInitialized.current) {
       await Tone.start();
       audioInitialized.current = true;
@@ -110,7 +103,6 @@ export default function RoundUI({
     synthRef.current.triggerAttackRelease(note, duration);
   };
 
-  // Function to play success sound (ascending major chord)
   const playSuccessSound = async () => {
     if (!synthRef.current) return;
     
@@ -126,7 +118,6 @@ export default function RoundUI({
     synthRef.current.triggerAttackRelease("C6", "4n", now + 0.3);
   };
 
-  // Function to play error sound (classic "fail" sound: PAM PAM PAAAM)
   const playErrorSound = async () => {
     if (!synthRef.current) return;
     
@@ -136,13 +127,11 @@ export default function RoundUI({
     }
 
     const now = Tone.now();
-    // Classic descending "fail" pattern (using more audible notes)
     synthRef.current.triggerAttackRelease("E4", "8n", now);
     synthRef.current.triggerAttackRelease("E4", "8n", now + 0.15);
     synthRef.current.triggerAttackRelease("C4", "4n", now + 0.3);
   };
 
-  // Reset state for new round and pick random notes
   useEffect(() => {
     setPhase("animation");
     setAnimationStep(0);
@@ -151,26 +140,22 @@ export default function RoundUI({
     setPlayedOptions(new Set());
     setTargetPlayed(false);
 
-    // Pick random notes for options (ensure all different)
     const shuffled = [...NOTE_RANGE].sort(() => Math.random() - 0.5);
-    const selectedNotes = shuffled.slice(0, numOptions); // Takes first N notes from shuffled array (guaranteed unique)
+    const selectedNotes = shuffled.slice(0, numOptions);
     setOptionNotes(selectedNotes);
 
-    // Pick one of the options as the target
+
     const correctIdx = Math.floor(Math.random() * numOptions);
     setCorrectOption(correctIdx + 1);
     setTargetNote(selectedNotes[correctIdx]);
   }, [roundNumber, timePerRound, numOptions]);
 
-  // Animation phase: cycle through options then target
   useEffect(() => {
     if (phase !== "animation") return;
 
-    let animationDuration = 2000; // 2 seconds per option
+    let animationDuration = 2000;
     
-    // Play sound immediately when step changes
     const playSoundForStep = async () => {
-      // Ensure audio context is started before playing
       if (!audioInitialized.current && synthRef.current) {
         try {
           await Tone.start();
@@ -181,10 +166,8 @@ export default function RoundUI({
       }
 
       if (animationStep < numOptions) {
-        // Playing options
         await playNote(optionNotes[animationStep], "1n");
       } else if (animationStep === numOptions) {
-        // Play target note
         setTargetPlayed(true);
         await playNote(targetNote, "1n");
         setTimeout(() => setTargetPlayed(false), animationDuration/2);
@@ -200,16 +183,14 @@ export default function RoundUI({
       } else if (animationStep === numOptions) {
         setAnimationStep(animationStep + 1);
       } else {
-        // Animation done, move to running
         setPhase("running");
-        setTimeRemaining(timePerRound * 1000); // convert to milliseconds
+        setTimeRemaining(timePerRound * 1000);
       }
     }, animationDuration);
 
     return () => clearTimeout(delay);
   }, [phase, animationStep, numOptions, timePerRound, optionNotes, targetNote]);
 
-  // Time countdown during running phase
   useEffect(() => {
     if (phase !== "running" || isPaused) return;
 
@@ -227,12 +208,11 @@ export default function RoundUI({
     return () => clearInterval(interval);
   }, [phase, isPaused]);
 
-  // Handle timeout when time reaches 0
   useEffect(() => {
     if (phase === "running" && timeRemaining <= 0) {
       setPhase("result");
-      setSelectedOption(0); // 0 means timeout
-      playErrorSound(); // Play fail sound on timeout
+      setSelectedOption(0);
+      playErrorSound();
       setTimeout(() => {
         onRoundComplete(0, false);
       }, 1500);
@@ -241,7 +221,6 @@ export default function RoundUI({
 
   const handleTargetReplay = async () => {
     if (!canReplayTarget) return;
-    // Play target note
     setTargetPlayed(true);
     await playNote(targetNote, "1n");
     setTimeout(() => setTargetPlayed(false), 500);
@@ -249,13 +228,11 @@ export default function RoundUI({
 
   const handleOptionPlay = async (optionNum: number) => {
     if (isPaused) return;
-    // Play the note for this option
     const noteIndex = optionNum - 1;
     if (noteIndex >= 0 && noteIndex < optionNotes.length) {
       await playNote(optionNotes[noteIndex], "1n");
     }
     
-    // Visual feedback
     const newPlayed = new Set(playedOptions);
     newPlayed.add(optionNum);
     setPlayedOptions(newPlayed);
@@ -271,14 +248,12 @@ export default function RoundUI({
     setPhase("result");
     const isCorrect = optionNum === correctOption;
 
-    // Play success or error sound
     if (isCorrect) {
       await playSuccessSound();
     } else {
       await playErrorSound();
     }
 
-    // Show result for 1 second (correct) or instant (wrong), then move on
     setTimeout(() => {
       onRoundComplete(optionNum, isCorrect);
     }, isCorrect ? 3000 : 1500);
@@ -421,17 +396,14 @@ export default function RoundUI({
             let borderColor = "#64748b";
 
             if (phase === "animation") {
-              // During animation, highlight current option
               if (animationStep < numOptions && animationStep === i) {
                 buttonColor = "#3b82f6";
                 borderColor = "#1d4ed8";
               }
             } else if (phase === "running" && playedOptions.has(optionNum)) {
-              // When replaying option during running phase, show blue
               buttonColor = "#3b82f6";
               borderColor = "#1d4ed8";
             } else if (selectedOption === optionNum && phase === "result") {
-              // Show selected option color
               if (optionNum === correctOption) {
                 buttonColor = "#10b981";
                 borderColor = "#059669";

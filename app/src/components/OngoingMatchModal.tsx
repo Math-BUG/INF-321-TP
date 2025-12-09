@@ -79,13 +79,11 @@ export function getOngoingMatch(): OngoingMatchData | null {
     const value = matchCookie.split("=")[1];
     const matchData = JSON.parse(decodeURIComponent(value));
     
-    // Check if match is not too old (24 hours)
     const now = Date.now();
     const age = now - matchData.timestamp;
-    const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+    const maxAge = 24 * 60 * 60 * 1000;
     
     if (age > maxAge) {
-      // Clear expired cookie
       document.cookie = 'ongoingMatch=; path=/; max-age=0';
       return null;
     }
