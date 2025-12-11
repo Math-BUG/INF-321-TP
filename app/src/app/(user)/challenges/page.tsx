@@ -1,6 +1,6 @@
-import { Breadcrumb } from "antd";
 import { fetchChallenges } from "../../actions/challenges";
 import ChallengesList from "../../../components/ChallengesList";
+import Title from "antd/es/typography/Title";
 
 export default async function ChallengesPage() {
   const initialChallenges = await fetchChallenges();
@@ -8,8 +8,7 @@ export default async function ChallengesPage() {
 
   return (
     <div>
-      <Breadcrumb items={[{ title: "Desafios" }]} style={{ marginBottom: 16 }} />
-      <h1>Desafios Musicais</h1>
+      <Title level={2} style={{ marginBottom: 24 }}>Desafios Musicais</Title>
       <ChallengesList initialChallenges={initialChallenges} />
     </div>
   );

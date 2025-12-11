@@ -3,19 +3,23 @@
 import React from "react";
 import { Layout, Menu, Button, Dropdown, Space, Avatar } from "antd";
 import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
+import type { MenuProps } from "antd";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { clearAuthCookie } from "@/app/actions/auth";
+
+type MenuItem = {
+  key: string;
+  label: string;
+  href?: string;
+  children?: MenuItem[];
+};
 
 interface NavigationProps {
   userName: string;
   userEmail: string;
   isAdmin: boolean;
-  items: Array<{
-    key: string;
-    label: string;
-    href: string;
-  }>;
+  items: MenuItem[];
   children?: React.ReactNode;
 }
 
@@ -31,9 +35,22 @@ export function Navigation({
   const [selectedKey, setSelectedKey] = React.useState("");
 
   React.useEffect(() => {
-    const currentItem = items.find((item) => pathname.includes(item.href));
-    if (currentItem) {
-      setSelectedKey(currentItem.key);
+    const findSelectedKey = (items: MenuItem[]): string | undefined => {
+      for (const item of items) {
+        if (item.href && pathname.includes(item.href)) {
+          return item.key;
+        }
+        if (item.children) {
+          const childKey = findSelectedKey(item.children);
+          if (childKey) return childKey;
+        }
+      }
+      return undefined;
+    };
+
+    const key = findSelectedKey(items);
+    if (key) {
+      setSelectedKey(key);
     }
   }, [pathname, items]);
 
@@ -41,6 +58,28 @@ export function Navigation({
     await clearAuthCookie();
     router.push("/login");
   }
+
+  const buildMenuItems = (items: MenuItem[]): MenuProps["items"] => {
+    return items.map((item) => {
+      if (item.children) {
+        return {
+          key: item.key,
+          label: item.label,
+          children: buildMenuItems(item.children),
+        };
+      }
+      return {
+        key: item.key,
+        label: item.href ? (
+          <Link href={item.href} style={{ textDecoration: "none" }}>
+            {item.label}
+          </Link>
+        ) : (
+          item.label
+        ),
+      };
+    });
+  };
 
   const userMenu = [
     {
@@ -100,14 +139,7 @@ export function Navigation({
             mode="inline"
             selectedKeys={[selectedKey]}
             style={{ height: "100%", borderRight: 0 }}
-            items={items.map((item) => ({
-              key: item.key,
-              label: (
-                <Link href={item.href} style={{ textDecoration: "none" }}>
-                  {item.label}
-                </Link>
-              ),
-            }))}
+            items={buildMenuItems(items)}
           />
         </Layout.Sider>
 

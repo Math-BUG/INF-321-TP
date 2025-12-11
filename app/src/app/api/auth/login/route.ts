@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     }
 
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
+    if (!user || user.deleted === 1) {
       return NextResponse.json({ error: "Credenciais inválidas" }, { status: 401 });
     }
 

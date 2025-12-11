@@ -24,6 +24,7 @@ model Challenge {
 
   // relations
   levels       Level[]
+  parameters   ChallengeParameter[]
 
   @@map("challenges")
 }
@@ -33,9 +34,11 @@ model Parameter {
   name        String   @unique
   description String?
   identifier  String?  @unique @default(cuid())
+  createdAt   DateTime @default(now())
 
   // relations
   levelValues LevelParameterValue[]
+  challenges  ChallengeParameter[]
   @@map("parameters")
 }
 
@@ -75,6 +78,22 @@ model LevelParameterValue {
   @@map("level_parameter_values")
 }
 
+model ChallengeParameter {
+  id          Int      @id @default(autoincrement())
+  challengeId Int
+  parameterId Int
+  createdAt   DateTime @default(now())
+
+  // relations
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  parameter   Parameter @relation(fields: [parameterId], references: [id], onDelete: Cascade)
+
+  @@unique([challengeId, parameterId])
+  @@index([challengeId])
+  @@index([parameterId])
+  @@map("challenge_parameters")
+}
+
 model User {
   id              Int      @id @default(autoincrement())
   name            String
@@ -86,6 +105,8 @@ model User {
   birthdate       DateTime? 
   address         String?
   musicExperience String?
+  deleted         Int       @default(0)
+  deletedAt       DateTime?
   createdAt       DateTime  @default(now())
 
   // relations

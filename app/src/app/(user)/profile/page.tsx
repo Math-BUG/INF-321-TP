@@ -1,8 +1,8 @@
-import { Breadcrumb } from "antd";
 import { fetchUserProfile, fetchUserMatchHistory, fetchPerformanceData } from "../../actions/user";
 import ProfileContent from "../../../components/ProfileContent";
 import { redirect } from "next/navigation";
 import { getAuthUser } from "../../actions/auth";
+import Title from "antd/es/typography/Title";
 
 export default async function ProfilePage() {
   const authUser = await getAuthUser();
@@ -23,8 +23,7 @@ export default async function ProfilePage() {
 
   return (
     <div>
-      <Breadcrumb items={[{ title: "Perfil" }]} style={{ marginBottom: 16 }} />
-      <h1>Meu Perfil</h1>
+      <Title level={2} style={{ marginBottom: 24 }}>Meu Perfil</Title>
       
       <ProfileContent 
         user={user} 

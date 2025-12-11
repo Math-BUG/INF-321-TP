@@ -37,6 +37,7 @@ async function seedNotesDifferentiationChallenge() {
 
     const parameters = await seedNotesDifferentiationParameters();
     await seedNotesDifferentiationLevels(challenge.id, parameters);
+    await seedChallengeParameters(challenge.id);
 }
 
 async function seedNotesDifferentiationParameters() {
@@ -170,6 +171,28 @@ async function seedNotesDifferentiationLevels(challengeId: number, parameters: a
         }
       }});
     }
+}
+
+async function seedChallengeParameters(challengeId: number) {
+    const allParameters = await prisma.parameter.findMany();
+    
+    for (const parameter of allParameters) {
+        await prisma.challengeParameter.upsert({
+            where: {
+                challengeId_parameterId: {
+                    challengeId: challengeId,
+                    parameterId: parameter.id,
+                }
+            },
+            update: {},
+            create: {
+                challengeId: challengeId,
+                parameterId: parameter.id,
+            }
+        });
+    }
+    
+    console.log(`Associated ${allParameters.length} parameters to challenge ${challengeId}`);
 }
 
 async function seedIntervalRecognitionChallenge() {

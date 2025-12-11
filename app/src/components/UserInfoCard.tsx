@@ -1,10 +1,16 @@
 "use client";
 
 import React from "react";
-import { Card, Descriptions, Button, Modal, Form, Input, message, Select, DatePicker } from "antd";
-import { EditOutlined } from "@ant-design/icons";
+import { Card, Descriptions, Button, Modal, Form, Input, message, Select, DatePicker, Space } from "antd";
+import { EditOutlined, DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
+import locale from "antd/es/date-picker/locale/pt_BR";
+import "dayjs/locale/pt-br";
 import { updateUserProfile, type UserProfile } from "../app/actions/user";
+import { deleteAccount } from "../app/actions/deleteAccount";
+
+dayjs.locale("pt-br");
 
 type UserInfoCardProps = {
   user: UserProfile;
@@ -12,9 +18,13 @@ type UserInfoCardProps = {
 };
 
 export default function UserInfoCard({ user, onUpdate }: UserInfoCardProps) {
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
   const [form] = Form.useForm();
+  const [deleteForm] = Form.useForm();
   const [loading, setLoading] = React.useState(false);
+  const [deleteLoading, setDeleteLoading] = React.useState(false);
 
   const handleEdit = () => {
     form.setFieldsValue({
@@ -56,6 +66,28 @@ export default function UserInfoCard({ user, onUpdate }: UserInfoCardProps) {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    try {
+      setDeleteLoading(true);
+      const values = await deleteForm.validateFields();
+      
+      const result = await deleteAccount(user.id, values.password);
+      
+      if (result.success) {
+        message.success("Conta excluída com sucesso");
+        setIsDeleteModalOpen(false);
+        router.push("/login");
+      } else {
+        message.error(result.error || "Erro ao excluir conta");
+      }
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      message.error("Erro ao excluir conta");
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   const formatDate = (date: Date | null) => {
     if (!date) return "Não informado";
     return new Date(date).toLocaleDateString("pt-BR");
@@ -66,9 +98,18 @@ export default function UserInfoCard({ user, onUpdate }: UserInfoCardProps) {
       <Card
         title="Informações do Usuário"
         extra={
-          <Button type="primary" icon={<EditOutlined />} onClick={handleEdit}>
-            Editar Perfil
-          </Button>
+          <Space>
+            <Button type="primary" icon={<EditOutlined />} onClick={handleEdit}>
+              Editar Perfil
+            </Button>
+            <Button 
+              danger 
+              icon={<DeleteOutlined />} 
+              onClick={() => setIsDeleteModalOpen(true)}
+            >
+              Excluir Conta
+            </Button>
+          </Space>
         }
       >
         <Descriptions column={2} bordered>
@@ -131,7 +172,8 @@ export default function UserInfoCard({ user, onUpdate }: UserInfoCardProps) {
             </Select>
           </Form.Item>
           <Form.Item label="Data de Nascimento" name="birthdate">
-            <DatePicker 
+            <DatePicker
+              locale={locale}
               format="DD/MM/YYYY" 
               placeholder="Selecione a data"
               style={{ width: "100%" }}
@@ -151,6 +193,56 @@ export default function UserInfoCard({ user, onUpdate }: UserInfoCardProps) {
               <Select.Option value="Avançada">Avançada</Select.Option>
               <Select.Option value="Profissional">Profissional</Select.Option>
             </Select>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        title={
+          <Space>
+            <ExclamationCircleOutlined style={{ color: "#ff4d4f" }} />
+            <span>Excluir Conta</span>
+          </Space>
+        }
+        open={isDeleteModalOpen}
+        onOk={handleDeleteAccount}
+        onCancel={() => {
+          setIsDeleteModalOpen(false);
+          deleteForm.resetFields();
+        }}
+        confirmLoading={deleteLoading}
+        okText="Confirmar Exclusão"
+        cancelText="Cancelar"
+        okButtonProps={{ danger: true }}
+      >
+        <div style={{ marginTop: 16, marginBottom: 16 }}>
+          <p style={{ marginBottom: 12, fontWeight: 500 }}>
+            ⚠️ Esta ação é irreversível!
+          </p>
+          <p style={{ marginBottom: 12 }}>
+            Ao excluir sua conta:
+          </p>
+          <ul style={{ marginBottom: 16, paddingLeft: 20 }}>
+            <li>Você não poderá mais acessar o sistema com este e-mail</li>
+            <li>Não será possível utilizar o mesmo e-mail para criar uma nova conta</li>
+            <li>Você será desconectado imediatamente</li>
+          </ul>
+          <p style={{ marginBottom: 16, color: "#ff4d4f", fontWeight: 500 }}>
+            Para prosseguir, informe sua senha:
+          </p>
+        </div>
+        
+        <Form form={deleteForm} layout="vertical">
+          <Form.Item
+            name="password"
+            rules={[
+              { required: true, message: "Por favor, informe sua senha" }
+            ]}
+          >
+            <Input.Password 
+              placeholder="Digite sua senha para confirmar"
+              autoComplete="current-password"
+            />
           </Form.Item>
         </Form>
       </Modal>

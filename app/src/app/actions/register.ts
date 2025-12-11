@@ -26,6 +26,12 @@ export async function registerUser(data: RegisterData): Promise<{
     });
 
     if (existingUser) {
+      if (existingUser.deleted === 1) {
+        return { 
+          success: false, 
+          error: "Este e-mail não está mais disponível para uso no sistema, pois a conta associada a ele foi deletada." 
+        };
+      }
       return { success: false, error: "Este e-mail já está cadastrado" };
     }
 

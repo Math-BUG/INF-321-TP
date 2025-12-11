@@ -28,7 +28,15 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
 
   const menuItems = [
     { key: "manage-users", label: "Gerenciar Usuários", href: "/manage-users" },
-    { key: "manage-levels", label: "Gerenciar Níveis", href: "/manage-levels" },
+    {
+      key: "manage-content",
+      label: "Gerenciar Conteúdo",
+      children: [
+        { key: "manage-challenges", label: "Desafios", href: "/manage-challenges" },
+        { key: "manage-parameters", label: "Parâmetros", href: "/manage-parameters" },
+        { key: "manage-levels", label: "Níveis", href: "/manage-levels" },
+      ],
+    },
   ];
 
   return (
